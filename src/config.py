@@ -31,6 +31,7 @@ SIMILARITY_THRESHOLD = float(os.getenv("SIMILARITY_THRESHOLD", "0.8"))
 # Scoring Settings
 AI_PROVIDER = os.getenv("AI_PROVIDER", "openai").lower() # openai or deepseek
 AI_API_KEY = os.getenv("AI_API_KEY")
+AI_BASE_URL = os.getenv("AI_BASE_URL")
 AI_MODEL = os.getenv("AI_MODEL", "gpt-4o") # or deepseek-chat
 
 # Ranking Settings

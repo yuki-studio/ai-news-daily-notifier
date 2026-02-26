@@ -1,14 +1,16 @@
 import json
 import os
 from openai import OpenAI
-from src.config import AI_API_KEY, AI_MODEL, AI_PROVIDER
+from src.config import AI_API_KEY, AI_MODEL, AI_PROVIDER, AI_BASE_URL
 from src.utils import setup_logger
 
 logger = setup_logger("ai_summary")
 
 client = None
 if AI_API_KEY:
-    if AI_PROVIDER == "deepseek":
+    if AI_BASE_URL:
+        client = OpenAI(api_key=AI_API_KEY, base_url=AI_BASE_URL)
+    elif AI_PROVIDER == "deepseek":
         client = OpenAI(api_key=AI_API_KEY, base_url="https://api.deepseek.com")
     else:
         client = OpenAI(api_key=AI_API_KEY)
