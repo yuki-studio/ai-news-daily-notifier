@@ -30,9 +30,9 @@ jobs:
         RSS_FEEDS: ${{ secrets.RSS_FEEDS }}
         FRESHNESS_HOURS: ${{ vars.FRESHNESS_HOURS || '48' }}
         AI_API_KEY: ${{ secrets.AI_API_KEY }}
-        AI_BASE_URL: ${{ vars.AI_BASE_URL }}
+        AI_BASE_URL: ${{ secrets.AI_BASE_URL || vars.AI_BASE_URL }}
         AI_PROVIDER: ${{ vars.AI_PROVIDER || 'openai' }}
-        AI_MODEL: ${{ vars.AI_MODEL || 'gpt-4o' }}
+        AI_MODEL: ${{ secrets.AI_MODEL || vars.AI_MODEL || 'gpt-4o' }}
         FEISHU_WEBHOOK: ${{ secrets.FEISHU_WEBHOOK }}
         TOP_N: ${{ vars.TOP_N || '5' }}
         LOG_LEVEL: 'INFO'

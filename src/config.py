@@ -20,7 +20,11 @@ DEFAULT_RSS_FEEDS = [
     "https://export.arxiv.org/rss/cs.AI"
 ]
 
-RSS_FEEDS = os.getenv("RSS_FEEDS", ",".join(DEFAULT_RSS_FEEDS)).split(",")
+RSS_FEEDS = os.getenv("RSS_FEEDS")
+if not RSS_FEEDS:
+    RSS_FEEDS = DEFAULT_RSS_FEEDS
+else:
+    RSS_FEEDS = RSS_FEEDS.split(",")
 
 # Filter Settings
 FRESHNESS_HOURS = int(os.getenv("FRESHNESS_HOURS", "48"))
