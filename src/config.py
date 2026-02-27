@@ -4,26 +4,34 @@ from dotenv import load_dotenv
 # Load environment variables from .env file if it exists
 load_dotenv()
 
-# RSS Feeds
-DEFAULT_RSS_FEEDS = [
-    # Official Sources (High Priority)
-    "https://openai.com/blog/rss.xml",
-    "https://blog.google/rss/",
-    "https://www.anthropic.com/news/rss",
-    "https://ai.meta.com/blog/rss/",
-    "https://blogs.microsoft.com/ai/feed/",
-    "https://developer.nvidia.com/blog/feed/",
-    
-    # Authoritative Tech Media
-    "https://venturebeat.com/category/ai/feed/",
-    "https://techcrunch.com/category/artificial-intelligence/feed/",
-    "https://www.theverge.com/ai-artificial-intelligence/rss/index.xml",
-    "https://www.technologyreview.com/topic/artificial-intelligence/feed/",
-    
-    # Technical Signal (Careful with Arxiv, it floods with papers)
-    "https://huggingface.co/blog/feed.xml",
-    # "https://export.arxiv.org/rss/cs.AI" # Removed Arxiv to reduce noise and academic papers
-]
+# RSS Feeds Configuration (PRD v1.3)
+
+# Tier 1: Official Sources (Priority +4)
+TIER1_SOURCES = {
+    "OpenAI": "https://openai.com/blog/rss.xml",
+    "Google": "https://blog.google/rss/",
+    "Anthropic": "https://www.anthropic.com/news/rss",
+    "Meta": "https://ai.meta.com/blog/rss/",
+    "Microsoft": "https://blogs.microsoft.com/ai/feed/",
+    "NVIDIA": "https://developer.nvidia.com/blog/feed/",
+    "Hugging Face": "https://huggingface.co/blog/feed.xml" # Treated as Tier 1 for technical community
+}
+
+# Tier 2: Authoritative Media (Priority +2)
+TIER2_SOURCES = {
+    "TechCrunch": "https://techcrunch.com/category/artificial-intelligence/feed/",
+    "The Verge": "https://www.theverge.com/ai-artificial-intelligence/rss/index.xml",
+    "MIT Tech Review": "https://www.technologyreview.com/topic/artificial-intelligence/feed/",
+    "VentureBeat": "https://venturebeat.com/category/ai/feed/", # PRD v1.3 puts VB in Tier 3, but let's keep it here for now or separate
+}
+
+# Tier 3: Cautious Sources (Max 1 item)
+TIER3_SOURCES = {
+    # Add more if needed, e.g. Wired
+}
+
+# Combine all feeds
+DEFAULT_RSS_FEEDS = list(TIER1_SOURCES.values()) + list(TIER2_SOURCES.values()) + list(TIER3_SOURCES.values())
 
 RSS_FEEDS = os.getenv("RSS_FEEDS")
 if not RSS_FEEDS:
@@ -31,8 +39,12 @@ if not RSS_FEEDS:
 else:
     RSS_FEEDS = RSS_FEEDS.split(",")
 
+# Important Companies (PRD v1.3)
+TIER1_COMPANIES = ["OpenAI", "Google", "DeepMind", "Anthropic", "Meta", "Microsoft", "Alibaba", "Baidu", "Tencent", "ByteDance", "Zhipu"]
+TIER2_COMPANIES = ["xAI", "NVIDIA", "Amazon", "Apple", "Mistral", "Perplexity", "Midjourney", "Stability"]
+
 # Filter Settings
-FRESHNESS_HOURS = int(os.getenv("FRESHNESS_HOURS", "48").strip() or "48")
+FRESHNESS_HOURS = int(os.getenv("FRESHNESS_HOURS", "24").strip() or "24") # Default 24h as per v1.3
 
 # Deduplication Settings
 SIMILARITY_THRESHOLD = float(os.getenv("SIMILARITY_THRESHOLD", "0.8").strip() or "0.8")

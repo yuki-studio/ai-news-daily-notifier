@@ -4,15 +4,16 @@ from src.config import FRESHNESS_HOURS
 
 logger = setup_logger("freshness_filter")
 
-def filter_fresh_news(news_list):
+def filter_fresh_news(news_list, hours=FRESHNESS_HOURS):
     """
     Filters news items that are older than the configured freshness threshold.
+    Allows overriding the hours threshold for fallback logic (24h -> 72h -> 5d).
     """
     fresh_news = []
     now = datetime.now()
-    cutoff_time = now - timedelta(hours=FRESHNESS_HOURS)
+    cutoff_time = now - timedelta(hours=hours)
     
-    logger.info(f"Filtering news older than {FRESHNESS_HOURS} hours (cutoff: {cutoff_time})")
+    logger.info(f"Filtering news older than {hours} hours (cutoff: {cutoff_time})")
     
     for item in news_list:
         publish_time = item.get("publish_time")
