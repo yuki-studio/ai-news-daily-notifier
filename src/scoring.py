@@ -84,8 +84,8 @@ def score_news(news_list):
         item["ai_score"] = ai_score
         
         # Final Score: Rule * 0.4 + AI * 0.6
-    # Adjusted weights: Rely more on Rules for source filtering
-    item["final_score"] = rule_score * 0.5 + ai_score * 0.5
+        # Adjusted weights: Rely more on Rules for source filtering
+        item["final_score"] = rule_score * 0.5 + ai_score * 0.5
         
         logger.debug(f"Scored '{item['title'][:30]}...': Rule={rule_score}, AI={ai_score}, Final={item['final_score']}")
         
