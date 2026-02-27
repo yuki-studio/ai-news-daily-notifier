@@ -54,8 +54,10 @@ def fetch_rss_feeds():
                 if published_parsed:
                     publish_time = datetime.fromtimestamp(time.mktime(published_parsed))
                 else:
-                    # If no date, use current time (fallback as per PRD)
-                    publish_time = datetime.now()
+                    # STRICT MODE: If no date, do NOT use current time. 
+                    # Set to None so we can filter it out later or handle it as "Unknown".
+                    # Using datetime.now() causes old news to appear fresh.
+                    publish_time = None
                 
                 news_item = {
                     "title": entry.get("title", ""),
@@ -66,7 +68,11 @@ def fetch_rss_feeds():
                     "content": entry.get("content", [{"value": ""}])[0]["value"] if "content" in entry else ""
                 }
                 
-                all_news.append(news_item)
+                # Only append if we have a valid date OR if we decide to allow date-less items (currently Rejecting)
+                if publish_time:
+                    all_news.append(news_item)
+                else:
+                    logger.debug(f"Skipping item with no date: {news_item['title']}")
                 
             logger.info(f"Fetched {len(feed.entries)} items from {feed_url}")
             

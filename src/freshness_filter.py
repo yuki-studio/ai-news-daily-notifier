@@ -6,33 +6,42 @@ logger = setup_logger("freshness_filter")
 
 def filter_fresh_news(news_list, hours=FRESHNESS_HOURS):
     """
-    Filters news items that are older than the configured freshness threshold.
-    Allows overriding the hours threshold for fallback logic (24h -> 72h -> 5d).
+    Filters news items using 'Relative Freshness'.
+    1. Find the latest timestamp in the entire list (max_publish_time).
+    2. Keep items within 'hours' of that max_publish_time.
+    
+    This solves the "System Time vs Real Time" paradox where 
+    system time is 2026 but RSS feeds have 2025 data.
     """
+    if not news_list:
+        return []
+        
     fresh_news = []
-    now = datetime.now()
-    cutoff_time = now - timedelta(hours=hours)
     
-    logger.info(f"Filtering news older than {hours} hours (cutoff: {cutoff_time})")
-    
+    # Normalize timezones first
+    valid_items = []
     for item in news_list:
         publish_time = item.get("publish_time")
-        
-        # Ensure publish_time is offset-naive for comparison with datetime.now()
-        # If it's offset-aware, convert to naive or convert 'now' to aware.
-        # Simplest is to make everything naive UTC or local.
-        # Feedparser usually gives UTC struct_time, converted to datetime in fetch_rss.
-        # If fetch_rss provided naive datetime, we are good.
-        # If fetch_rss provided aware datetime, we need to handle it.
-        
+        if not publish_time:
+            continue
         if publish_time.tzinfo is not None:
-             publish_time = publish_time.replace(tzinfo=None)
+            item["publish_time"] = publish_time.replace(tzinfo=None)
+        valid_items.append(item)
+        
+    if not valid_items:
+        return []
 
-        if publish_time >= cutoff_time:
+    # Find the latest time in the feed
+    max_publish_time = max(item["publish_time"] for item in valid_items)
+    
+    # Calculate cutoff relative to the LATEST item found, NOT system clock
+    cutoff_time = max_publish_time - timedelta(hours=hours)
+    
+    logger.info(f"Relative Freshness: Latest item is from {max_publish_time}. Filtering older than {hours}h (cutoff: {cutoff_time})")
+    
+    for item in valid_items:
+        if item["publish_time"] >= cutoff_time:
             fresh_news.append(item)
-        else:
-            # logger.debug(f"Discarding old news: {item['title']} ({publish_time})")
-            pass
             
     logger.info(f"Filtered {len(news_list) - len(fresh_news)} old items. Remaining: {len(fresh_news)}")
     return fresh_news

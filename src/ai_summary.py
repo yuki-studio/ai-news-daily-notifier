@@ -63,15 +63,21 @@ def get_ai_score(news_item):
 def generate_summary(news_item):
     """
     Generates a structured summary for the news item using AI.
-    Returns a dictionary with title, summary, key_points, impact, etc.
+    Returns a dictionary with title, summary, key_changes, etc.
     """
     if not client:
+        # Fallback to RSS summary if available
+        fallback_summary = news_item.get("summaries", ["No summary available."])[0]
+        # Clean up HTML tags if simple
+        import re
+        fallback_summary = re.sub('<[^<]+?>', '', fallback_summary)[:200] + "..."
+        
         return {
-            "title": news_item.get("title"),
-            "summary": "AI API Key missing. " + news_item.get("summaries", [""])[0],
-            "key_points": ["API Key missing"],
-            "impact": "Unknown",
-            "publish_date": news_item.get("publish_time").strftime("%Y-%m-%d")
+            "title": news_item.get("title", "No Title"),
+            "summary": f"[AI Key Missing] {fallback_summary}",
+            "key_changes": ["Configure AI_API_KEY to enable smart summaries"],
+            "source_name": news_item.get("source", "RSS Source"),
+            "url": news_item.get("link", "#")
         }
         
     title = news_item.get("title", "")
@@ -79,46 +85,41 @@ def generate_summary(news_item):
     sources = ", ".join(news_item.get("sources", []))
     
     prompt = f"""
-    你是AI行业资深分析师，正在为科技高管和开发者撰写每日行业简报。
-    你的任务是从输入的AI新闻中提炼出最有价值、最硬核的信息，拒绝空洞的套话。
+    You are an AI News Feed Editor. 
+    Your task is to extract high-value information from the input news for Product Managers and Developers.
     
-    输入新闻:
+    Input News:
     Title: {title}
     Sources: {sources}
     Content Summaries: {summaries}
 
-    输出JSON:
+    Output JSON Format:
     {{
-        "title":"",
-        "summary":"",
-        "source_name":"",
-        "url":""
+        "title": "Chinese Title",
+        "summary": "Chinese Summary",
+        "key_changes": ["Change 1", "Change 2", "Change 3"],
+        "source_name": "Source Name",
+        "url": "Original URL"
     }}
     
-    要求:
+    CRITICAL REQUIREMENTS (PRD v1.5):
     
-    1. title: <= 30字，必须包含公司名和产品名/技术名。必须使用中文。
+    1. Title:
+       - Format: [Company/Product] + [Action/Event]
+       - No "Marketing Fluff" (e.g. Revolution, Game Changer).
+       - Keep it factual. 
+       
+    2. Summary:
+       - 1 paragraph, objective, factual.
+       - Focus on WHAT happened.
     
-    2. summary: 
-       - 80-120字。
-       - 必须是一段连贯的文字，禁止分段。
-       - 写作风格：客观、专业、高密度、新闻体。
-       - 必须包含：
-         * 【主体】哪家公司/机构发布了什么？
-         * 【核心特性】相比前代或竞品，最大的技术突破/性能提升是什么？（如有具体参数，必须保留，如"上下文窗口提升至1M"、"推理成本降低50%"）
-         * 【应用/影响】对开发者或行业意味着什么？
-       - 拒绝：
-         * 拒绝"旨在解决..."、"有望..."等虚词。
-         * 拒绝"引发了广泛关注"、"具有里程碑意义"等主观评价。
-         * 拒绝"该框架..."、"这项技术..."等指代不清的开头，直接说产品名。
-    
-    3. source_name: 来源名称（如 OpenAI Blog, TechCrunch）。
-    
-    4. url: 原文链接。
-    
-    规则:
-    - 必须使用中文。
-    - 必须保留关键技术参数（如参数量、分数、价格、倍数）。
+    3. Key Changes (CRITICAL):
+       - List specific changes (Bullet points).
+       - Must include at least one of: New Model Name, API Change, Price Change, Parameter Change, New Feature Name.
+       - If no specific change is found, return empty list (which will cause rejection).
+       
+    4. Language:
+       - Simplified Chinese.
     """
     
     try:
@@ -140,6 +141,7 @@ def generate_summary(news_item):
         return {
             "title": title,
             "summary": "Failed to generate summary.",
+            "key_changes": [],
             "source_name": "Unknown",
             "url": ""
         }
