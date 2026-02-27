@@ -47,10 +47,17 @@ def calculate_rule_score(item):
             is_official = True
             break
     
+    # Boost Official Sources significantly
     if is_official:
-        score += 15
+        score += 30 # Increased from 15 to 30
     else:
+        # Penalize unknown sources slightly if needed, or just keep low base
         score += 5
+        
+    # Check for "Arxiv" in source or link and Penalize
+    # We want industry news, not just papers
+    if any("arxiv" in s.lower() for s in sources) or "arxiv.org" in item.get("link", "").lower():
+        score -= 20 # Penalize Arxiv papers unless they are huge breakthroughs
         
     # 5. Multiple Sources
     num_sources = len(sources)
@@ -77,7 +84,8 @@ def score_news(news_list):
         item["ai_score"] = ai_score
         
         # Final Score: Rule * 0.4 + AI * 0.6
-        item["final_score"] = rule_score * 0.4 + ai_score * 0.6
+    # Adjusted weights: Rely more on Rules for source filtering
+    item["final_score"] = rule_score * 0.5 + ai_score * 0.5
         
         logger.debug(f"Scored '{item['title'][:30]}...': Rule={rule_score}, AI={ai_score}, Final={item['final_score']}")
         

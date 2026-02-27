@@ -6,18 +6,23 @@ load_dotenv()
 
 # RSS Feeds
 DEFAULT_RSS_FEEDS = [
+    # Official Sources (High Priority)
     "https://openai.com/blog/rss.xml",
     "https://blog.google/rss/",
     "https://www.anthropic.com/news/rss",
     "https://ai.meta.com/blog/rss/",
     "https://blogs.microsoft.com/ai/feed/",
     "https://developer.nvidia.com/blog/feed/",
+    
+    # Authoritative Tech Media
     "https://venturebeat.com/category/ai/feed/",
     "https://techcrunch.com/category/artificial-intelligence/feed/",
     "https://www.theverge.com/ai-artificial-intelligence/rss/index.xml",
     "https://www.technologyreview.com/topic/artificial-intelligence/feed/",
+    
+    # Technical Signal (Careful with Arxiv, it floods with papers)
     "https://huggingface.co/blog/feed.xml",
-    "https://export.arxiv.org/rss/cs.AI"
+    # "https://export.arxiv.org/rss/cs.AI" # Removed Arxiv to reduce noise and academic papers
 ]
 
 RSS_FEEDS = os.getenv("RSS_FEEDS")
